@@ -1,0 +1,13 @@
+root = true
+
+# All files
+[*]
+indent_style = space
+
+# C# files
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:warning
+
+# Xml files
+[*.xml]
+indent_size = 2
