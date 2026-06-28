@@ -60,15 +60,9 @@
     # FunctionsToExport = @()
 
     # Cmdlets to export from this module.
-    # CmdletsToExport = @(
-    #     "Deploy-WtWin32App",
-    #     "Get-WtWin32Apps",
-    #     "New-IntuneWinPackage",
-    #     "New-WtWingetPackage",
-    #     "Remove-WtWin32App",
-    #     "Unprotect-IntuneWinPackage"
-    #     "Update-WtIntuneApp"
-    # )
+    CmdletsToExport = @(
+        'Connect-CaPolice'
+    )
 
     # Variables to export from this module.
     # VariablesToExport = @()
@@ -90,7 +84,7 @@
         PSData = @{
             Tags = @('Conditional Access', 'Graph')
 
-            LisenceUri = 'https://github.com/svrooij/CaPolice/blob/main/LICENSE.txt'
+            LicenseUri = 'https://github.com/svrooij/CaPolice/blob/main/LICENSE.txt'
             ProjectUri = 'https://github.com/svrooij/CaPolice/'
             ReleaseNotes = 'This module is still a work-in-progress. Changes might be made without notice.'
         }

@@ -20,16 +20,6 @@
           "System.Text.Json": "10.0.3"
         }
       },
-      "Azure.Identity.Broker": {
-        "type": "Direct",
-        "requested": "[1.7.0, )",
-        "resolved": "1.7.0",
-        "contentHash": "8LyppC9m3z1B+41V7p8JUWH902NwuJl0k+UEIQ5r7pCIVX3JWO1LGRHYVnXELEMet8fCAo5HGI9FS31XlRRSqg==",
-        "dependencies": {
-          "Azure.Core": "1.57.0",
-          "Microsoft.Identity.Client.Broker": "4.83.3"
-        }
-      },
       "Microsoft.Extensions.DependencyInjection": {
         "type": "Direct",
         "requested": "[10.0.9, )",
@@ -327,15 +317,6 @@
           "System.Diagnostics.DiagnosticSource": "6.0.1"
         }
       },
-      "Microsoft.Identity.Client.Broker": {
-        "type": "Transitive",
-        "resolved": "4.83.3",
-        "contentHash": "1yn682hgnCimnYR27Ne/SRMWxCWUZtCKjYwPzWbjrfhqBF1GS7bDlPZkF4yvJxl90Y+xzDdZFh4u9pcGIFSEvw==",
-        "dependencies": {
-          "Microsoft.Identity.Client": "4.83.3",
-          "Microsoft.Identity.Client.NativeInterop": "0.20.4"
-        }
-      },
       "Microsoft.Identity.Client.Extensions.Msal": {
         "type": "Transitive",
         "resolved": "4.84.2",
@@ -344,11 +325,6 @@
           "Microsoft.Identity.Client": "4.84.2",
           "System.Security.Cryptography.ProtectedData": "4.5.0"
         }
-      },
-      "Microsoft.Identity.Client.NativeInterop": {
-        "type": "Transitive",
-        "resolved": "0.20.4",
-        "contentHash": "JHlfJ8oolxj20sNlwdIh8H8MZtzVQ55MyOjrIrQCtD/KJL5x8EOjQxafYu8AEYZOCSW+09DQnRogGk+J37BURA=="
       },
       "Microsoft.IdentityModel.Abstractions": {
         "type": "Transitive",
