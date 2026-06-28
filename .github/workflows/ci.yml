@@ -37,7 +37,9 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}".Substring(1)
           Write-Host "Setting module version to $version"
-          (Get-Content src/CaPolice/CaPolice.psd1) -replace 'ModuleVersion = ".*"', "ModuleVersion = '$version'" | Set-Content src/CaPolice/CaPolice.psd1
+          $manifestContent = Get-Content src/CaPolice/CaPolice.psd1
+          $manifestContent = $manifestContent -replace 'ModuleVersion = ''\d+\.\d+\.\d+''', "ModuleVersion = '$version'"
+          $manifestContent | Set-Content src/CaPolice/CaPolice.psd1
 
       - name: Build tagged version
         shell: pwsh

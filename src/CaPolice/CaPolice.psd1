@@ -3,7 +3,7 @@
     RootModule = 'CaPolice.dll'
 
     # Version number of this module.
-    ModuleVersion = '0.1.0'
+    ModuleVersion = '0.0.1'
 
     # ID used to uniquely identify this module.
     GUID = 'd36e4c47-4835-4497-ab68-cce825adc9f5'
@@ -19,7 +19,7 @@
     # Description of this module.
     Description = 'Automate your Conditional Access policies with CaPolice'
 
-    # Minimum version of the Windows PowerShell engine required by this module.
+    # Minimum version of the PowerShell engine required by this module.
     # This module is build on net8.0 which requires PowerShell 7.4
     PowerShellVersion = '7.4'
 
@@ -82,7 +82,7 @@
     # Private data to pass to the module specified in RootModule/ModuleToProcess.
     PrivateData = @{
         PSData = @{
-            Tags = @('Conditional Access', 'Graph')
+            Tags = @('Conditional-Access', 'Graph')
 
             LicenseUri = 'https://github.com/svrooij/CaPolice/blob/main/LICENSE.txt'
             ProjectUri = 'https://github.com/svrooij/CaPolice/'
