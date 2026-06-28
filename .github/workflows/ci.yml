@@ -20,6 +20,9 @@ jobs:
       - name: Restore (locked)
         run: dotnet restore --locked-mode
 
+      - name: Restore tools
+        run: dotnet tool restore
+
       - name: Build
         run: dotnet build --no-restore -c Release
 

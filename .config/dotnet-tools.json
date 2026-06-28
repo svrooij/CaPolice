@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "svrooij.powershell.docs": {
+      "version": "0.2.0",
+      "commands": [
+        "pwsh-docs"
+      ],
+      "rollForward": false
+    }
+  }
+}

@@ -39,7 +39,7 @@
         <Message Text="Generating $(PowerShellDocsFile)" Importance="high" />
         <Message Text="Project path $(ProjectDir)" Importance="high" />
         <Message Text="Output path $(OutputPath)" Importance="high" />
-        <Exec Command="pwsh-docs --dll $(ProjectDir)$(OutputPath)\CaPolice.dll --use-xml-docs --maml-file $(ProjectDir)\$(PowerShellDocsFile)" />
+        <Exec Command="dotnet pwsh-docs --dll $(ProjectDir)$(OutputPath)\CaPolice.dll --use-xml-docs --maml-file $(ProjectDir)\$(PowerShellDocsFile)" />
         <OnError ExecuteTargets="DocsGenerationError" />
     </Target>
     <Target Name="DocsGenerationError">
