@@ -74,8 +74,8 @@ jobs:
           Invoke-Pester -Configuration $cfg
 
       - name: Publish test results
-        uses: dorny/test-reporter@v1
-        if: always()
+        uses: dorny/test-reporter@v3
+        if: ${{ !cancelled() }}  
         with:
           name: Pester results
           path: test-results.xml

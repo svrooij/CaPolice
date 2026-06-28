@@ -40,6 +40,7 @@
         <Message Text="Project path $(ProjectDir)" Importance="high" />
         <Message Text="Output path $(OutputPath)" Importance="high" />
         <Exec Command="dotnet pwsh-docs --dll $(ProjectDir)$(OutputPath)\CaPolice.dll --use-xml-docs --maml-file $(ProjectDir)\$(PowerShellDocsFile)" />
+        <Copy SourceFiles="$(ProjectDir)$(PowerShellDocsFile)" DestinationFolder="$(OutputPath)" />
         <OnError ExecuteTargets="DocsGenerationError" />
     </Target>
     <Target Name="DocsGenerationError">
