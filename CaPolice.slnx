@@ -4,6 +4,7 @@
     <File Path=".gitignore" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/CaPolice.Loader/CaPolice.Loader.csproj" />
     <Project Path="src/CaPolice/CaPolice.csproj" />
   </Folder>
 </Solution>

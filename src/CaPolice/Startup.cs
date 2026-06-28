@@ -5,14 +5,17 @@ using Svrooij.PowerShell.DI.Logging;
 using System;
 
 namespace CaPolice;
-
+/// <inheritdoc/>
 public class Startup : PsStartup
 {
+    /// <inheritdoc/>
     public override void ConfigureServices(IServiceCollection services)
     {
         services.AddHttpClient();
         services.AddSingleton<Authentication.CredentialContainer>();
     }
+
+    /// <inheritdoc/>
     public override Action<PowerShellLoggerConfiguration> ConfigurePowerShellLogging()
     {
         return builder =>

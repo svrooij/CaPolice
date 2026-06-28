@@ -52,7 +52,9 @@
     # FormatsToProcess = @()
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess.
-    # NestedModules = @()
+    # The loader registers a custom AssemblyLoadContext before the root module is loaded,
+    # so its cmdlets' dependencies resolve to the bundled versions in the Dependencies folder.
+    NestedModules = @('CaPolice.Loader.dll')
 
     # Functions to export from this module.
     # FunctionsToExport = @()
@@ -77,6 +79,7 @@
     # List of all files included in this module.
     FileList = @(
         "CaPolice.dll",
+        "CaPolice.Loader.dll",
         "CaPolice.psd1",
         "CaPolice.psm1",
         "CaPolice.dll-Help.xml"

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>CaPolice.Loader</AssemblyName>
+    <RootNamespace>CaPolice</RootNamespace>
+    <Nullable>enable</Nullable>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compile-time only reference for System.Management.Automation. -->
+    <!-- This keeps the loader assembly free of any runtime dependency that could conflict. -->
+    <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
