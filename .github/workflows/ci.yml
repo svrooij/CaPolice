@@ -1,8 +1,12 @@
-name: CI
+﻿name: CI
 
 on:
   push:
-    branches: [master, main]
+    branches:
+      - main
+    tags:
+      - 'v*'
+
   pull_request:
 
 jobs:
@@ -23,8 +27,20 @@ jobs:
       - name: Restore tools
         run: dotnet tool restore
 
-      - name: Build
+      - name: Build untagged version
+        if: "!startsWith(github.ref, 'refs/tags/')"
         run: dotnet build --no-restore -c Release
+
+      - name: Set module version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          $version = "${{ github.ref_name }}".Substring(1)
+          Write-Host "Setting module version to $version"
+          (Get-Content src/CaPolice/CaPolice.psd1) -replace 'ModuleVersion = ".*"', "ModuleVersion = '$version'" | Set-Content src/CaPolice/CaPolice.psd1
+
+      - name: Build tagged version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: dotnet build --no-restore -c Release -p:Version=$("${{ github.ref_name }}".Substring(1))
 
       - name: Format check
         run: dotnet format --verify-no-changes
@@ -53,9 +69,9 @@ jobs:
           name: module-release
           path: src/CaPolice/bin/Release/net8.0/
 
-      - name: Install Pester
-        shell: pwsh
-        run: Install-Module Pester -MinimumVersion 5.0.0 -Force -Scope CurrentUser
+      # - name: Install Pester
+      #   shell: pwsh
+      #   run: Install-Module Pester -MinimumVersion 5.0.0 -Force -Scope CurrentUser
 
       - name: Import module
         shell: pwsh
@@ -81,3 +97,29 @@ jobs:
           path: test-results.xml
           reporter: java-junit
           fail-on-error: true
+
+  publish-psgallery:
+    name: 📦 Publish CaPolice to PowerShell Gallery
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build, test-module]
+    steps:
+      - name: Download build output
+        uses: actions/download-artifact@v8
+        with:
+          name: module-release
+          path: dist/CaPolice/
+
+      - name: 🧪 Import module
+        shell: pwsh
+        run: |
+          Import-Module ./dist/CaPolice/CaPolice.psd1
+          Get-Command -Module CaPolice
+
+      - name: 📦 Publish CaPolice to PowerShell Gallery
+        shell: pwsh
+        run: |
+          Import-Module ./dist/CaPolice/CaPolice.psd1
+          Publish-Module -Path ./dist/CaPolice -NuGetApiKey $env:PSGALLERY_TOKEN -Repository PSGallery -Force
+        env:
+          PSGALLERY_TOKEN: ${{ secrets.PSGALLERY_TOKEN }}
