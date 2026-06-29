@@ -11,8 +11,7 @@ public class Startup : PsStartup
     /// <inheritdoc/>
     public override void ConfigureServices(IServiceCollection services)
     {
-        services.AddHttpClient();
-        services.AddSingleton<Authentication.CredentialContainer>();
+        services.AddSingleton(Authentication.CredentialContainer.Instance);
     }
 
     /// <inheritdoc/>

@@ -5,6 +5,12 @@ namespace CaPolice.Authentication;
 
 internal class CredentialContainer
 {
+    private static readonly CredentialContainer _instance = new();
+
+    internal static CredentialContainer Instance => _instance;
+
+    private CredentialContainer() { }
+
     private TokenCredential? _tokenCredential;
 
     internal TokenCredential? TokenCredential

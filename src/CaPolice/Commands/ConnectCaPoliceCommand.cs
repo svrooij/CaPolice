@@ -119,9 +119,6 @@ public partial class ConnectCaPoliceCommand : DependencyCmdlet<Startup>
     [ServiceDependency(Required = true)]
     private Authentication.CredentialContainer _credentialContainer;
 
-    [ServiceDependency(Required = true)]
-    private System.Net.Http.IHttpClientFactory _httpClientFactory;
-
     /// <inheritdoc />
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
     {
@@ -149,7 +146,7 @@ public partial class ConnectCaPoliceCommand : DependencyCmdlet<Startup>
                     });
                 break;
             case GitHubParameterSet:
-                _credentialContainer.TokenCredential = new Authentication.GithubActionsTokenCredential(ClientId, TenantId, httpClient: _httpClientFactory.CreateClient());
+                _credentialContainer.TokenCredential = new Authentication.GithubActionsTokenCredential(ClientId, TenantId, httpClient: new System.Net.Http.HttpClient());
                 break;
             case ManagedIdentityParameterSet:
                 _credentialContainer.TokenCredential = new Azure.Identity.ManagedIdentityCredential(new Azure.Identity.ManagedIdentityCredentialOptions());
