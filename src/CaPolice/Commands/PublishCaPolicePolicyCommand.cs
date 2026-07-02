@@ -263,10 +263,10 @@ public partial class PublishCaPolicePolicyCommand : DependencyCmdlet<Startup>
     {
         var conditions = policyNode["conditions"]?.AsObject() ?? new JsonObject();
         var users = conditions["users"]?.AsObject() ?? new JsonObject();
-        
+
         if (breakglassUsers?.Length > 0)
         {
-            var excludeUsers = users["excludeUsers"]?.AsArray() ?? new JsonArray();   
+            var excludeUsers = users["excludeUsers"]?.AsArray() ?? new JsonArray();
             foreach (var u in breakglassUsers)
             {
                 if (!ContainsValue(excludeUsers, u))
