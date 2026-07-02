@@ -1,13 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.5/src/CaPolice/settings.schema.json",
+  "$id": "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.5/settings/settings.schema.json",
   "title": "CaPolice Settings",
   "description": "Configuration file for CaPolice conditional access policy management.",
   "type": "object",
-  "required": ["tenantId", "policies"],
+  "required": [ "tenantId", "policies" ],
   "anyOf": [
-    { "required": ["breakglassUsers"] },
-    { "required": ["breakglassGroups"] }
+    { "required": [ "breakglassUsers" ] },
+    { "required": [ "breakglassGroups" ] }
   ],
   "additionalProperties": false,
   "properties": {
@@ -48,7 +48,7 @@
       "title": "Policy",
       "description": "A single conditional access policy entry.",
       "type": "object",
-      "required": ["file", "name", "tag", "version", "status"],
+      "required": [ "file", "name", "tag", "version", "status" ],
       "additionalProperties": false,
       "properties": {
         "file": {
@@ -88,7 +88,7 @@
         "status": {
           "description": "Desired enforcement state of the policy.",
           "type": "string",
-          "enum": ["enabled", "disabled", "report"]
+          "enum": [ "enabled", "disabled", "report" ]
         }
       }
     }
