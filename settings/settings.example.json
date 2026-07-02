@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.5/settings/settings.schema.json",
+  "$schema": "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.6/settings/settings.schema.json",
   "tenantId": "YOUR_TENANT_ID",
   "breakglassUsers": [
     "YOUR_BREAKGLASS_USER_1"

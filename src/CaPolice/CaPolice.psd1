@@ -63,7 +63,8 @@
     CmdletsToExport = @(
         'Connect-CaPolice',
         'Export-CaPolicePolicy',
-        'New-CaPoliceSettings'
+        'New-CaPoliceSettings',
+        'Publish-CaPolicePolicy'
     )
 
     # Variables to export from this module.
