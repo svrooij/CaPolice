@@ -62,7 +62,8 @@
     # Cmdlets to export from this module.
     CmdletsToExport = @(
         'Connect-CaPolice',
-        'Export-CaPolicePolicy'
+        'Export-CaPolicePolicy',
+        'New-CaPoliceSettings'
     )
 
     # Variables to export from this module.
@@ -77,7 +78,8 @@
         "CaPolice.Loader.dll",
         "CaPolice.psd1",
         "CaPolice.psm1",
-        "CaPolice.dll-Help.xml"
+        "CaPolice.dll-Help.xml",
+        "README.md"
     )
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess.

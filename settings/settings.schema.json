@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.5/settings/settings.schema.json",
+  "title": "CaPolice Settings",
+  "description": "Configuration file for CaPolice conditional access policy management.",
+  "type": "object",
+  "required": [ "tenantId", "policies" ],
+  "anyOf": [
+    { "required": [ "breakglassUsers" ] },
+    { "required": [ "breakglassGroups" ] }
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "tenantId": {
+      "description": "The Entra ID tenant ID that the policies are managed in.",
+      "type": "string",
+      "minLength": 1
+    },
+    "breakglassUsers": {
+      "description": "One or more break-glass user object IDs that are excluded from all conditional access policies.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "breakglassGroups": {
+      "description": "One or more break-glass group object IDs that are excluded from all conditional access policies.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "policies": {
+      "description": "Map of policies managed by CaPolice. Each key is an arbitrary identifier for the policy.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/policy"
+      },
+      "minProperties": 1
+    }
+  },
+  "$defs": {
+    "policy": {
+      "title": "Policy",
+      "description": "A single conditional access policy entry.",
+      "type": "object",
+      "required": [ "file", "name", "tag", "version", "status" ],
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "description": "Path to the JSON file containing the policy definition, relative to the settings file.",
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "description": "Object ID of the policy in the tenant. Omit when the policy has not yet been created.",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "description": "Human-readable display name of the policy.",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "description": "Optional description of what the policy enforces.",
+          "type": "string"
+        },
+        "tag": {
+          "description": "Short tag used to group related policies, e.g. the prefix used in the naming convention.",
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "description": "Version of the policy in vX.Y format, or an empty string when not versioned.",
+          "type": "string",
+          "pattern": "^(v\\d+\\.\\d+)?$"
+        },
+        "skipBreakglass": {
+          "description": "When true, the break-glass users and groups are NOT automatically excluded from this policy.",
+          "type": "boolean",
+          "default": false
+        },
+        "status": {
+          "description": "Desired enforcement state of the policy.",
+          "type": "string",
+          "enum": [ "enabled", "disabled", "report" ]
+        }
+      }
+    }
+  }
+}

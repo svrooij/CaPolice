@@ -51,6 +51,9 @@
     </Target>
 
   <ItemGroup>
+    <None Include="..\..\README.md" Link="README.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="CaPolice.dll-Help.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
