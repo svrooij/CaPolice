@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.5/settings/settings.schema.json",
+  "$id": "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.6/settings/settings.schema.json",
   "title": "CaPolice Settings",
   "description": "Configuration file for CaPolice conditional access policy management.",
   "type": "object",
@@ -89,6 +89,42 @@
           "description": "Desired enforcement state of the policy.",
           "type": "string",
           "enum": [ "enabled", "disabled", "report" ]
+        },
+        "includeUsers": {
+          "description": "Overrides conditions.users.includeUsers in the policy JSON at publish time. Values prefixed with ORG_ are placeholders from a source tenant and must be replaced before publishing.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "not": { "pattern": "^ORG_" }
+          }
+        },
+        "excludeUsers": {
+          "description": "Overrides conditions.users.excludeUsers in the policy JSON at publish time. Values prefixed with ORG_ are placeholders from a source tenant and must be replaced before publishing.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "not": { "pattern": "^ORG_" }
+          }
+        },
+        "includeGroups": {
+          "description": "Overrides conditions.users.includeGroups in the policy JSON at publish time. Values prefixed with ORG_ are placeholders from a source tenant and must be replaced before publishing.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "not": { "pattern": "^ORG_" }
+          }
+        },
+        "excludeGroups": {
+          "description": "Overrides conditions.users.excludeGroups in the policy JSON at publish time. Values prefixed with ORG_ are placeholders from a source tenant and must be replaced before publishing.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "not": { "pattern": "^ORG_" }
+          }
         }
       }
     }

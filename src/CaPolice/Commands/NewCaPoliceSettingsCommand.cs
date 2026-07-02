@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Svrooij.PowerShell.DI;
 using System;
 using System.IO;
@@ -13,7 +13,7 @@ namespace CaPolice.Commands;
 
 /// <summary>
 /// <para type="synopsis">Creates a new CaPolice settings file.</para>
-/// <para type="description">Creates a new settings JSON file for CaPolice. If -PolicyFolder is specified, all *.json policy files in that folder are read and added as policy entries; the tag, version, name and description are parsed from each policy's displayName field following the "TAG: Title-vX.Y" convention. When -NewTenant is specified, policy IDs are omitted and every imported policy's status is forced to "report".</para>
+/// <para type="description">Creates a new settings JSON file for CaPolice. If -PolicyFolder is specified, all *.json policy files in that folder are read and added as policy entries; the tag, version, name and description are parsed from each policy's displayName field following the "TAG: Title-vX.Y" convention. When -NewTenant is specified, policy IDs are omitted, every imported policy's status is forced to "report", and any user or group IDs found in the policy JSON are written into the settings entry as ORG_&lt;id&gt; placeholders. These placeholders intentionally violate the settings schema so that the settings file cannot be published until each ORG_ value has been replaced with a valid target-tenant object ID.</para>
 /// </summary>
 /// <example>
 /// <para type="name">Create a minimal settings file</para>
@@ -31,11 +31,13 @@ namespace CaPolice.Commands;
 /// <code>New-CaPoliceSettings -SettingsFile ./settings.json -TenantId "00000000-0000-0000-0000-000000000000" -BreakglassGroups "group-object-id" -PolicyFolder ./Policies -NewTenant</code>
 /// </example>
 [GenerateBindings]
-[Cmdlet(VerbsCommon.New, "CaPoliceSettings")]
+[Cmdlet(VerbsCommon.New, "CaPoliceSettings", DefaultParameterSetName = DefaultParameterSet)]
 [OutputType(typeof(FileInfo))]
 public partial class NewCaPoliceSettingsCommand : DependencyCmdlet<Startup>
 {
     private const string SchemaUrl = "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.5/settings/settings.schema.json";
+    private const string DefaultParameterSet = "Default";
+    private const string NewTenantParameterSet = "NewTenant";
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     /// <summary>
@@ -78,11 +80,28 @@ public partial class NewCaPoliceSettingsCommand : DependencyCmdlet<Startup>
     public string? PolicyFolder { get; set; }
 
     /// <summary>
-    /// When specified, policy IDs are omitted and the status for every imported policy is set to "report". Use this when deploying existing policies to a new tenant.
+    /// Activates new-tenant mode: policy IDs are omitted, all statuses are forced to "report", and user/group IDs from the source tenant are written as ORG_&lt;id&gt; placeholders. Combine with -SourceBreakglassUsers and -SourceBreakglassGroups to drop source-tenant breakglass accounts instead of turning them into placeholders.
     /// </summary>
     [Parameter(
-        Mandatory = false)]
+        Mandatory = true,
+        ParameterSetName = NewTenantParameterSet)]
     public SwitchParameter NewTenant { get; set; }
+
+    /// <summary>
+    /// Source-tenant break-glass user object IDs to exclude from ORG_ placeholder generation. Matching IDs in the policy's excludeUsers list are dropped cleanly because they will be replaced by the new tenant's break-glass users. Only valid with -NewTenant.
+    /// </summary>
+    [Parameter(
+        Mandatory = false,
+        ParameterSetName = NewTenantParameterSet)]
+    public string[]? SourceBreakglassUsers { get; set; }
+
+    /// <summary>
+    /// Source-tenant break-glass group object IDs to exclude from ORG_ placeholder generation. Matching IDs in the policy's excludeGroups list are dropped cleanly because they will be replaced by the new tenant's break-glass groups. Only valid with -NewTenant.
+    /// </summary>
+    [Parameter(
+        Mandatory = false,
+        ParameterSetName = NewTenantParameterSet)]
+    public string[]? SourceBreakglassGroups { get; set; }
 
     [ServiceDependency(Required = true)]
     private ILogger<NewCaPoliceSettingsCommand> _logger;
@@ -186,6 +205,18 @@ public partial class NewCaPoliceSettingsCommand : DependencyCmdlet<Startup>
                 policyEntry["version"] = version;
                 policyEntry["status"] = status;
 
+                if (NewTenant)
+                {
+                    var wrotePlaceholders = WriteOrgArrays(policyEntry, root,
+                        SourceBreakglassUsers ?? [],
+                        SourceBreakglassGroups ?? []);
+                    if (wrotePlaceholders)
+                        WriteWarning(
+                            $"Policy '{displayName}' contains user/group references from the source tenant. " +
+                            "They have been written as ORG_<id> placeholders. " +
+                            "Replace every ORG_ value with a valid target-tenant object ID before publishing.");
+                }
+
                 var key = SanitizeKey(tag);
                 if (policies.ContainsKey(key))
                     key = SanitizeKey($"{tag}_{fileStem}");
@@ -206,6 +237,55 @@ public partial class NewCaPoliceSettingsCommand : DependencyCmdlet<Startup>
 
         _logger.LogInformation("Created settings file {FilePath}", settingsFileInfo.FullName);
         WriteObject(settingsFileInfo);
+    }
+
+    private static readonly string[] _userGroupProps =
+        ["includeUsers", "excludeUsers", "includeGroups", "excludeGroups"];
+
+    // Reads each user/group array from the policy JSON and writes it into the settings entry
+    // with every ID prefixed by "ORG_". IDs that match a source-tenant breakglass entry are
+    // dropped cleanly (they will be replaced by the new tenant's breakglass accounts by
+    // InjectBreakglass at publish time). Returns true when at least one ORG_ placeholder was
+    // written so the caller can emit a warning.
+    private static bool WriteOrgArrays(
+        JsonObject policyEntry,
+        JsonElement root,
+        string[] sourceBreakglassUsers,
+        string[] sourceBreakglassGroups)
+    {
+        if (!root.TryGetProperty("conditions", out var conditions) ||
+            !conditions.TryGetProperty("users", out var users))
+            return false;
+
+        var wrotePlaceholders = false;
+
+        foreach (var prop in _userGroupProps)
+        {
+            if (!users.TryGetProperty(prop, out var arr) ||
+                arr.ValueKind != JsonValueKind.Array ||
+                arr.GetArrayLength() == 0)
+                continue;
+
+            // Breakglass accounts that should be silently dropped for this array type.
+            var skipSet = prop is "excludeUsers" ? sourceBreakglassUsers
+                        : prop is "excludeGroups" ? sourceBreakglassGroups
+                        : [];
+
+            var jsonArr = new JsonArray();
+            foreach (var item in arr.EnumerateArray())
+            {
+                var id = item.GetString();
+                if (id is null) continue;
+                if (Array.IndexOf(skipSet, id) >= 0) continue;
+                jsonArr.Add($"ORG_{id}");
+                wrotePlaceholders = true;
+            }
+
+            if (jsonArr.Count > 0)
+                policyEntry[prop] = jsonArr;
+        }
+
+        return wrotePlaceholders;
     }
 
     private static string MapState(string? state) => state switch
