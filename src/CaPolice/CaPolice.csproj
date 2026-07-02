@@ -7,6 +7,7 @@
 	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
       <Nullable>enable</Nullable>
+      <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
       <NoWarn>CS8618</NoWarn>
       <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
       <PowerShellDocsFile>CaPolice.dll-Help.xml</PowerShellDocsFile>
@@ -33,6 +34,11 @@
         </ItemGroup>
         <MakeDir Directories="$(OutputPath)Dependencies" />
         <Move SourceFiles="@(DependencyDlls)" DestinationFolder="$(OutputPath)Dependencies" />
+        <!-- ref/ contains compilation-only reference assemblies; runtimes/ contains RID-specific
+             native binaries already provided by the PowerShell 7 (.NET 8) host process.
+             Neither is needed to load or run the module. -->
+        <RemoveDir Directories="$(OutputPath)ref" />
+        <RemoveDir Directories="$(OutputPath)runtimes" />
     </Target>
 
     <Target Name="GenerateDocumentation" AfterTargets="AfterBuild" Outputs="$(PowerShellDocsFile)" Condition="!Exists($(PowerShellDocsFile))">
@@ -48,6 +54,17 @@
     </Target>
     <Target Name="RemoveDocumentation" AfterTargets="CoreClean">
         <Delete Files="$(PowerShellDocsFile)" />
+    </Target>
+
+    <!-- Delete the intermediate XML doc file once GenerateDocumentation has consumed it.
+         AfterTargets="GenerateDocumentation" is evaluated at plan time, so this target
+         still runs on incremental builds where GenerateDocumentation is skipped by its
+         Condition (the XML is regenerated every build and is not needed in the output). -->
+    <Target Name="RemoveXmlDocumentation" AfterTargets="GenerateDocumentation">
+        <Delete Files="$(OutputPath)$(AssemblyName).xml" />
+        <Delete Files="$(OutputPath)$(AssemblyName).deps.json" />
+        <Delete Files="$(OutputPath)*.pdb" Condition="'$(Configuration)' == 'Release'" /> <!-- Only delete PDBs for release builds, as they are useful for debugging in development builds. -->
+
     </Target>
 
   <ItemGroup>
