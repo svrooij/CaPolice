@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.5/settings/settings.schema.json",
+  "tenantId": "YOUR_TENANT_ID",
+  "breakglassUsers": [
+    "YOUR_BREAKGLASS_USER_1"
+  ],
+  "breakglassGroups": [
+    "YOUR_BREAKGLASS_GROUP_1"
+  ],
+  "policies": {
+    "policy1": {
+      "file": "policy1.json",
+      "id": "Id of the policy in the tenant",
+      "name": "Name of the policy",
+      "description": "Description of the policy",
+      "tag": "Tag for the policy",
+      "version": "v1.0",
+      "skipBreakglass": false,
+      "status": "report"
+    }
+  }
+}
