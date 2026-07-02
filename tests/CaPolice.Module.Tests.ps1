@@ -18,6 +18,10 @@ AfterAll {
     Remove-Module CaPolice -ErrorAction SilentlyContinue
 }
 
+# Read directly from the source manifest so the -ForEach list is always in sync
+# with CmdletsToExport
+$script:TestedCmdlets = (Import-PowerShellDataFile "$PSScriptRoot/../src/CaPolice/CaPolice.psd1").CmdletsToExport
+
 Describe 'Module manifest' {
     It 'passes Test-ModuleManifest' {
         $ManifestPath = "$PSScriptRoot/../src/CaPolice/bin/Release/net8.0/CaPolice.psd1"
@@ -78,5 +82,39 @@ Describe 'Connect-CaPolice parameter sets' {
 
     It 'defaults to DefaultCredentials' {
         $cmd.DefaultParameterSet | Should -Be 'DefaultCredentials'
+    }
+}
+
+Describe 'Cmdlet documentation quality' {
+    BeforeAll {
+        # Exclude built-in common parameters (Verbose, Debug, ErrorAction, etc.)
+        $CommonParams = [System.Management.Automation.Cmdlet]::CommonParameters +
+                        [System.Management.Automation.Cmdlet]::OptionalCommonParameters
+    }
+
+    Context '<Cmdlet>' -ForEach ($script:TestedCmdlets | ForEach-Object { @{ Cmdlet = $_ } }) {
+        BeforeAll {
+            $Help = Get-Help $Cmdlet -Full
+            $OwnParams = @(Get-Help $Cmdlet -Parameter * -ErrorAction SilentlyContinue) |
+                         Where-Object { $_.name -notin $CommonParams }
+        }
+
+        It 'has a synopsis' {
+            $Help.Synopsis | Should -Not -BeNullOrEmpty
+        }
+
+        It 'has a description' {
+            $Help.Description | Should -Not -BeNullOrEmpty
+        }
+
+        It 'has at least one example' {
+            @($Help.Examples.Example).Count | Should -BeGreaterThan 0
+        }
+
+        It 'has no undocumented parameters' {
+            $undocumented = $OwnParams | Where-Object { -not $_.description }
+            $names = $undocumented.name -join ', '
+            $undocumented | Should -BeNullOrEmpty -Because "these parameters are missing descriptions: $names"
+        }
     }
 }
