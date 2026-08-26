@@ -24,6 +24,7 @@ public sealed class ModuleInitializer : IModuleAssemblyInitializer, IModuleAssem
         "Microsoft.Extensions.Logging",
         "Microsoft.Extensions.Options",
         "Microsoft.Extensions.Primitives",
+        "Azure.Core",
     ];
 
     /// <summary>Called by PowerShell when this module is imported. Registers the dependency resolver.</summary>

@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Core" Version="1.59.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
-	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="10.0.9" />
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.11" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="Svrooij.PowerShell.DI" Version="1.3.4" />
@@ -50,7 +50,7 @@
         <OnError ExecuteTargets="DocsGenerationError" />
     </Target>
     <Target Name="DocsGenerationError">
-        <Error Text="Documentation could not be generated" />
+        <Error Text="Documentation could not be generated. Did you install the dotnet pwsh-docs tool? dotnet tool restore" />
     </Target>
     <Target Name="RemoveDocumentation" AfterTargets="CoreClean">
         <Delete Files="$(PowerShellDocsFile)" />
