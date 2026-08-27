@@ -1,5 +1,4 @@
 using CaPolice.Models;
-using CaPolice.Services;
 using Microsoft.Extensions.Logging;
 using Svrooij.PowerShell.DI;
 using System;
@@ -61,7 +60,7 @@ public partial class PublishCaPolicePolicyCommand : DependencyCmdlet<Startup>
     private Authentication.CredentialContainer _credentialContainer;
 
     [ServiceDependency(Required = true)]
-    private ISettingsValidator _validator;
+    private Services.ISettingsValidator _validator;
 
     /// <inheritdoc />
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
