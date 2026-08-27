@@ -1,4 +1,5 @@
 using CaPolice.Models;
+using CaPolice.Services;
 using Microsoft.Extensions.Logging;
 using Svrooij.PowerShell.DI;
 using System;
@@ -59,6 +60,9 @@ public partial class PublishCaPolicePolicyCommand : DependencyCmdlet<Startup>
     [ServiceDependency(Required = true)]
     private Authentication.CredentialContainer _credentialContainer;
 
+    [ServiceDependency(Required = true)]
+    private ISettingsValidator _validator;
+
     /// <inheritdoc />
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
     {
@@ -82,6 +86,24 @@ public partial class PublishCaPolicePolicyCommand : DependencyCmdlet<Startup>
                 settingsFile));
             return;
         }
+
+        // Validate settings file before proceeding
+        _logger.LogInformation("Validating settings file...");
+        var validationErrors = await _validator.ValidateSettingsFileAsync(settingsFile.FullName, null, cancellationToken);
+        if (validationErrors.Count > 0)
+        {
+            _logger.LogError("Settings file validation failed with {ErrorCount} error(s). Publishing cancelled.", validationErrors.Count);
+            foreach (var error in validationErrors)
+            {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException(error),
+                    "SettingsValidationFailed",
+                    ErrorCategory.InvalidData,
+                    settingsFile));
+            }
+            return;
+        }
+        _logger.LogInformation("Settings file validation passed.");
 
         var settingsJson = await File.ReadAllTextAsync(settingsFile.FullName, cancellationToken);
         using var settingsDoc = JsonDocument.Parse(settingsJson);

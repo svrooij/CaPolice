@@ -118,7 +118,18 @@ public partial class ExportCaPolicePolicyCommand : DependencyCmdlet<Startup>
         {
             _logger.LogDebug("Fetching policies from {Url}", nextUrl);
             using var response = await httpClient.GetAsync(nextUrl, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogError("Failed to fetch policies from {Url}: {StatusCode} {ReasonPhrase}. Response: {Response}",
+                    nextUrl, response.StatusCode, response.ReasonPhrase, errorContent);
+                ThrowTerminatingError(new ErrorRecord(
+                    new HttpRequestException($"Failed to fetch policies from {nextUrl}: {response.StatusCode} {response.ReasonPhrase}"),
+                    "HttpRequestFailed",
+                    ErrorCategory.InvalidOperation,
+                    null));
+                return;
+            }
 
             using var doc = await JsonDocument.ParseAsync(
                 await response.Content.ReadAsStreamAsync(cancellationToken),
