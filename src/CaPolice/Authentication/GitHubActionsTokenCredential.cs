@@ -64,7 +64,7 @@ public class GithubActionsTokenCredential : TokenCredential
     public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
         ValidateSettings();
-        clientAssertionCredential ??= new ClientAssertionCredential(TenantId, ClientId, (cancallationToken) => GetIdToken(cancellationToken));
+        clientAssertionCredential ??= new ClientAssertionCredential(TenantId, ClientId, (cancellationToken) => GetIdToken(cancellationToken));
 
         return clientAssertionCredential.GetToken(requestContext, cancellationToken);
     }
@@ -78,7 +78,7 @@ public class GithubActionsTokenCredential : TokenCredential
     public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
         ValidateSettings();
-        clientAssertionCredential ??= new ClientAssertionCredential(TenantId, ClientId, (cancallationToken) => GetIdToken(cancellationToken));
+        clientAssertionCredential ??= new ClientAssertionCredential(TenantId, ClientId, (cancellationToken) => GetIdToken(cancellationToken));
         return clientAssertionCredential.GetTokenAsync(requestContext, cancellationToken);
     }
 
