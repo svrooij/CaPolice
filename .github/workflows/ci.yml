@@ -122,6 +122,9 @@ jobs:
       - name: Restore (locked)
         run: dotnet restore --locked-mode
 
+      - name: Restore tools
+        run: dotnet tool restore
+
       # Building the test project also builds the CaPolice module (net8.0) via the
       # build-ordering ProjectReference, so the isolation tests can import it from
       # bin/Release/net8.0.
