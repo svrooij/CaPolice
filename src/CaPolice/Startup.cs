@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CaPolice.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Svrooij.PowerShell.DI;
 using Svrooij.PowerShell.DI.Logging;
@@ -11,7 +12,7 @@ public class Startup : PsStartup
     /// <inheritdoc/>
     public override void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton(Authentication.CredentialContainer.Instance);
+        services.RegisterCoreServices();
     }
 
     /// <inheritdoc/>

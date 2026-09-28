@@ -12,7 +12,7 @@ using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CaPolice.Authentication;
+namespace CaPolice.Core.Authentication;
 
 /// <summary>
 /// Represents a token credential that retrieves an ID token from GitHub Actions OIDC and uses it to authenticate with Entra ID.
@@ -64,7 +64,7 @@ public class GithubActionsTokenCredential : TokenCredential
     public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
         ValidateSettings();
-        clientAssertionCredential ??= new ClientAssertionCredential(TenantId, ClientId, (cancallationToken) => GetIdToken(cancellationToken));
+        clientAssertionCredential ??= new ClientAssertionCredential(TenantId, ClientId, (cancellationToken) => GetIdToken(cancellationToken));
 
         return clientAssertionCredential.GetToken(requestContext, cancellationToken);
     }
@@ -78,7 +78,7 @@ public class GithubActionsTokenCredential : TokenCredential
     public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
         ValidateSettings();
-        clientAssertionCredential ??= new ClientAssertionCredential(TenantId, ClientId, (cancallationToken) => GetIdToken(cancellationToken));
+        clientAssertionCredential ??= new ClientAssertionCredential(TenantId, ClientId, (cancellationToken) => GetIdToken(cancellationToken));
         return clientAssertionCredential.GetTokenAsync(requestContext, cancellationToken);
     }
 

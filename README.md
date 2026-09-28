@@ -29,6 +29,7 @@ Install-Module -Name CaPolice -Repository PSGallery -Scope CurrentUser
 ```powershell
 # 1. Authenticate (interactive browser fallback on developer machines)
 Connect-CaPolice -UseDefaultCredentials
+# 1b. For use in GitHub Actions, use the -GitHub switch, which will handle the authentication using GitHub federated credentials
 
 # 2. Export all policies from your tenant to JSON files
 Export-CaPolicePolicy -OutputPath ./Policies
@@ -38,6 +39,12 @@ New-CaPoliceSettings -SettingsFile ./settings.json `
     -TenantId "00000000-0000-0000-0000-000000000000" `
     -BreakglassUsers "breakglass-user-object-id" `
     -PolicyFolder ./Policies
+# 3b. If deploying to a new tenant, use the -NewTenant switch to omit policy IDs and force all statuses to 'report'
+
+# 4. Modify your settings accordingly, using Visual Studio Code which validates the settings
+
+# 5. Deploy the policies to your (new) tenant
+Publish-CaPolicePolicy -SettingsFile ./settings.json
 ```
 
 ## Commands
@@ -109,6 +116,40 @@ New-CaPoliceSettings -SettingsFile ./settings.json `
     -BreakglassGroups "breakglass-group-object-id" `
     -PolicyFolder ./Policies `
     -NewTenant
+```
+
+### `Test-CaPoliceSettings`
+
+Validates a CaPolice settings file against the JSON schema and checks all policies for common issues such as unresolved placeholders and invalid status values. The validation results are returned as `$true` (valid) or `$false` (invalid), with all errors reported via the error pipeline.
+
+| Parameter | Description |
+|---|---|
+| `-SettingsFile` | Path to the settings file to validate. |
+| `-SettingsSchema` | Optional path to a custom JSON schema file. If not specified, the embedded schema matching the compiled version is used. |
+
+```powershell
+# Validate a settings file
+Test-CaPoliceSettings -SettingsFile ./settings.json
+
+# Validate with a custom schema
+Test-CaPoliceSettings -SettingsFile ./settings.json -SettingsSchema ./custom-schema.json
+```
+
+### `Publish-CaPolicePolicy`
+
+Publishes conditional access policies defined in a CaPolice settings file to the connected tenant. Reads each policy entry from the settings file, loads its JSON definition from disk, validates the settings, strips read-only Graph properties, applies the desired state and injects break-glass exclusions, then creates or updates the policy in the tenant via Microsoft Graph. When a policy has no id in the settings file it is created and the new id is written back. Requires `Connect-CaPolice` to be run first.
+
+| Parameter | Description |
+|---|---|
+| `-SettingsFile` | Path to the CaPolice settings file. All policies defined in this file will be published. |
+| `-WhatIf` | Preview what would be created or updated without actually calling Graph. |
+
+```powershell
+# Publish all policies
+Publish-CaPolicePolicy -SettingsFile ./settings.json
+
+# Preview without making changes
+Publish-CaPolicePolicy -SettingsFile ./settings.json -WhatIf
 ```
 
 ## Links

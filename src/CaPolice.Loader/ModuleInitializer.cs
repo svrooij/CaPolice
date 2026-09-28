@@ -15,15 +15,17 @@ public sealed class ModuleInitializer : IModuleAssemblyInitializer, IModuleAssem
     // ensures our versions are used when the DI container or other internal code requests them.
     private static readonly string[] s_preloadAssemblies =
     [
-        "Microsoft.Extensions.DependencyInjection.Abstractions",
-        "Microsoft.Extensions.Logging.Abstractions",
-        "System.Text.Json",
+        //"Microsoft.Extensions.DependencyInjection.Abstractions",
+        //"Microsoft.Extensions.Logging.Abstractions",
+        //"System.Text.Json",
         "System.Diagnostics.DiagnosticSource",
         "System.IO.Pipelines",
-        "Microsoft.Extensions.DependencyInjection",
-        "Microsoft.Extensions.Logging",
+        //"Microsoft.Extensions.DependencyInjection",
+        //"Microsoft.Extensions.Logging",
         "Microsoft.Extensions.Options",
-        "Microsoft.Extensions.Primitives",
+        //"Microsoft.Extensions.Primitives",
+        "Azure.Core",
+        "CaPolice.Core",
     ];
 
     /// <summary>Called by PowerShell when this module is imported. Registers the dependency resolver.</summary>

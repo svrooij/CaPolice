@@ -83,12 +83,12 @@ public partial class ExportCaPolicePolicyCommand : DependencyCmdlet<Startup>
     private ILogger<ExportCaPolicePolicyCommand> _logger;
 
     [ServiceDependency(Required = true)]
-    private Authentication.CredentialContainer _credentialContainer;
+    private Abstractions.ICredentialContainer _credentialContainer;
 
     /// <inheritdoc />
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
     {
-        if (_credentialContainer.TokenCredential is null)
+        if (!_credentialContainer.CredentialsSet)
         {
             ThrowTerminatingError(new ErrorRecord(
                 new InvalidOperationException("Not connected to Graph. Run Connect-CaPolice first."),
@@ -105,11 +105,10 @@ public partial class ExportCaPolicePolicyCommand : DependencyCmdlet<Startup>
             outputDir.Create();
         }
 
-        var tokenResult = await _credentialContainer.TokenCredential.GetTokenAsync(
-            new Azure.Core.TokenRequestContext(RequiredScopes), cancellationToken);
+        var token = await _credentialContainer.GetAccessTokenAsync(RequiredScopes, cancellationToken);
 
         using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.Token);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var nextUrl = GraphPoliciesUrl;
         var count = 0;
@@ -118,7 +117,18 @@ public partial class ExportCaPolicePolicyCommand : DependencyCmdlet<Startup>
         {
             _logger.LogDebug("Fetching policies from {Url}", nextUrl);
             using var response = await httpClient.GetAsync(nextUrl, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogError("Failed to fetch policies from {Url}: {StatusCode} {ReasonPhrase}. Response: {Response}",
+                    nextUrl, response.StatusCode, response.ReasonPhrase, errorContent);
+                ThrowTerminatingError(new ErrorRecord(
+                    new HttpRequestException($"Failed to fetch policies from {nextUrl}: {response.StatusCode} {response.ReasonPhrase}"),
+                    "HttpRequestFailed",
+                    ErrorCategory.InvalidOperation,
+                    null));
+                return;
+            }
 
             using var doc = await JsonDocument.ParseAsync(
                 await response.Content.ReadAsStreamAsync(cancellationToken),

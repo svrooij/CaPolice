@@ -64,7 +64,8 @@
         'Connect-CaPolice',
         'Export-CaPolicePolicy',
         'New-CaPoliceSettings',
-        'Publish-CaPolicePolicy'
+        'Publish-CaPolicePolicy',
+        'Test-CaPoliceSettings'
     )
 
     # Variables to export from this module.

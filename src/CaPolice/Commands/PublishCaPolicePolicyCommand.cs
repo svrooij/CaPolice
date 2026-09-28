@@ -1,4 +1,4 @@
-using CaPolice.Models;
+using CaPolice.Abstractions.Models;
 using Microsoft.Extensions.Logging;
 using Svrooij.PowerShell.DI;
 using System;
@@ -57,12 +57,15 @@ public partial class PublishCaPolicePolicyCommand : DependencyCmdlet<Startup>
     private ILogger<PublishCaPolicePolicyCommand> _logger;
 
     [ServiceDependency(Required = true)]
-    private Authentication.CredentialContainer _credentialContainer;
+    private Abstractions.ICredentialContainer _credentialContainer;
+
+    [ServiceDependency(Required = true)]
+    private Abstractions.ISettingsValidator _validator;
 
     /// <inheritdoc />
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
     {
-        if (_credentialContainer.TokenCredential is null)
+        if (!_credentialContainer.CredentialsSet)
         {
             ThrowTerminatingError(new ErrorRecord(
                 new InvalidOperationException("Not connected to Graph. Run Connect-CaPolice first."),
@@ -82,6 +85,24 @@ public partial class PublishCaPolicePolicyCommand : DependencyCmdlet<Startup>
                 settingsFile));
             return;
         }
+
+        // Validate settings file before proceeding
+        _logger.LogInformation("Validating settings file...");
+        var validationErrors = await _validator.ValidateSettingsFileAsync(settingsFile.FullName, null, cancellationToken);
+        if (validationErrors.Count > 0)
+        {
+            _logger.LogError("Settings file validation failed with {ErrorCount} error(s). Publishing cancelled.", validationErrors.Count);
+            foreach (var error in validationErrors)
+            {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException(error),
+                    "SettingsValidationFailed",
+                    ErrorCategory.InvalidData,
+                    settingsFile));
+            }
+            return;
+        }
+        _logger.LogInformation("Settings file validation passed.");
 
         var settingsJson = await File.ReadAllTextAsync(settingsFile.FullName, cancellationToken);
         using var settingsDoc = JsonDocument.Parse(settingsJson);
@@ -110,11 +131,10 @@ public partial class PublishCaPolicePolicyCommand : DependencyCmdlet<Startup>
             return;
         }
 
-        var tokenResult = await _credentialContainer.TokenCredential.GetTokenAsync(
-            new Azure.Core.TokenRequestContext(RequiredScopes), cancellationToken);
+        var token = await _credentialContainer.GetAccessTokenAsync(RequiredScopes, cancellationToken);
 
         using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.Token);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // We will need to write the id back for newly created policies, so build a mutable
         // copy of the settings JSON from the file content.

@@ -11,6 +11,11 @@
   ],
   "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "description": "Schema version of this settings file.",
+      "type": "string",
+      "const": "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.6/settings/settings.schema.json"
+    },
     "tenantId": {
       "description": "The Entra ID tenant ID that the policies are managed in.",
       "type": "string",
