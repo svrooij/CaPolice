@@ -912,6 +912,22 @@
         "resolved": "8.0.0",
         "contentHash": "Obg3a90MkOw9mYKxrardLpY2u0axDMrSmy4JCdq2cYbelM2cUwmUir5Bomvd1yxmPL9h5LVHU1tuKBZpUjfASg=="
       },
+      "capolice.abstractions": {
+        "type": "Project"
+      },
+      "capolice.core": {
+        "type": "Project",
+        "dependencies": {
+          "Azure.Core": "[1.62.0, )",
+          "CaPolice.Abstractions": "[1.0.0, )",
+          "JsonSchema.Net": "[7.2.2, )",
+          "Microsoft.Extensions.DependencyInjection": "[10.0.11, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.11, )",
+          "Microsoft.Extensions.Logging.Configuration": "[10.0.11, )",
+          "System.Security.Cryptography.Xml": "[10.0.11, )",
+          "System.Text.Json": "[10.0.11, )"
+        }
+      },
       "capolice.loader": {
         "type": "Project"
       }

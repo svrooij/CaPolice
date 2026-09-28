@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CaPolice.Services;
+namespace CaPolice.Abstractions;
 
 /// <summary>
 /// Service for validating CaPolice settings files against the JSON schema and policies.

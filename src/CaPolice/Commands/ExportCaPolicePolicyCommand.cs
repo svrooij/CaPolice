@@ -83,12 +83,12 @@ public partial class ExportCaPolicePolicyCommand : DependencyCmdlet<Startup>
     private ILogger<ExportCaPolicePolicyCommand> _logger;
 
     [ServiceDependency(Required = true)]
-    private Authentication.CredentialContainer _credentialContainer;
+    private Abstractions.ICredentialContainer _credentialContainer;
 
     /// <inheritdoc />
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
     {
-        if (_credentialContainer.TokenCredential is null)
+        if (!_credentialContainer.CredentialsSet)
         {
             ThrowTerminatingError(new ErrorRecord(
                 new InvalidOperationException("Not connected to Graph. Run Connect-CaPolice first."),
@@ -105,11 +105,10 @@ public partial class ExportCaPolicePolicyCommand : DependencyCmdlet<Startup>
             outputDir.Create();
         }
 
-        var tokenResult = await _credentialContainer.TokenCredential.GetTokenAsync(
-            new Azure.Core.TokenRequestContext(RequiredScopes), cancellationToken);
+        var token = await _credentialContainer.GetAccessTokenAsync(RequiredScopes, cancellationToken);
 
         using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.Token);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var nextUrl = GraphPoliciesUrl;
         var count = 0;

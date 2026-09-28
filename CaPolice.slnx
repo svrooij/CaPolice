@@ -10,10 +10,13 @@
     <File Path=".gitignore" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/CaPolice.Abstractions/CaPolice.Abstractions.csproj" />
+    <Project Path="src/CaPolice.Core/CaPolice.Core.csproj" />
     <Project Path="src/CaPolice.Loader/CaPolice.Loader.csproj" />
     <Project Path="src/CaPolice/CaPolice.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/CaPolice.Module.Tests.ps1" />
+    <Project Path="tests/CaPolice.Tests/CaPolice.Tests.csproj" />
   </Folder>
 </Solution>

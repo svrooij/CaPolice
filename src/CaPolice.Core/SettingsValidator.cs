@@ -1,22 +1,15 @@
 using Json.Schema;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Text.Json.Nodes;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace CaPolice.Services;
+namespace CaPolice.Core;
 
 /// <summary>
 /// Service for validating CaPolice settings files against the JSON schema and policies.
 /// </summary>
-internal class SettingsValidator : ISettingsValidator
+internal class SettingsValidator : Abstractions.ISettingsValidator
 {
-    internal const string SchemaUrl = "https://raw.githubusercontent.com/svrooij/CaPolice/v0.0.6/settings/settings.schema.json";
+    internal const string SchemaUrl = Abstractions.SettingsConstants.SchemaUrl;
     private readonly ILogger<SettingsValidator> _logger;
 
     public SettingsValidator(ILogger<SettingsValidator> logger)

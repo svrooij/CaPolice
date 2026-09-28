@@ -43,7 +43,7 @@ public partial class ValidateCaPoliceSettingsCommand : DependencyCmdlet<Startup>
     private ILogger<ValidateCaPoliceSettingsCommand> _logger;
 
     [ServiceDependency(Required = true)]
-    private Services.ISettingsValidator _validator;
+    private Abstractions.ISettingsValidator _validator;
 
     /// <inheritdoc />
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)

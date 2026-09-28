@@ -1,4 +1,4 @@
-namespace CaPolice.Models;
+namespace CaPolice.Abstractions.Models;
 
 /// <summary>
 /// The result of publishing a single conditional access policy.

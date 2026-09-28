@@ -35,7 +35,7 @@ namespace CaPolice.Commands;
 [OutputType(typeof(FileInfo))]
 public partial class NewCaPoliceSettingsCommand : DependencyCmdlet<Startup>
 {
-    private const string SchemaUrl = Services.SettingsValidator.SchemaUrl;
+    private const string SchemaUrl = Abstractions.SettingsConstants.SchemaUrl;
     private const string DefaultParameterSet = "Default";
     private const string NewTenantParameterSet = "NewTenant";
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };

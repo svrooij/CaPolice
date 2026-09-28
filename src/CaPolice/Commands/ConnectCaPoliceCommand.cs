@@ -2,7 +2,6 @@
 using Svrooij.PowerShell.DI;
 using System;
 using System.Management.Automation;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,6 +38,9 @@ public partial class ConnectCaPoliceCommand : DependencyCmdlet<Startup>
     private const string GitHubParameterSet = "GitHub";
     private const string ManagedIdentityParameterSet = "ManagedIdentity";
 
+    private const string AZURE_TENANT_ID = "AZURE_TENANT_ID";
+    private const string AZURE_CLIENT_ID = "AZURE_CLIENT_ID";
+
     //private const string InteractiveBrowserClientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
     private const string InteractiveBrowserClientId = "463147f6-19da-494d-9897-b7285740d804";
     private static readonly string[] DefaultScopes = ["https://graph.microsoft.com/.default"];
@@ -54,7 +56,7 @@ public partial class ConnectCaPoliceCommand : DependencyCmdlet<Startup>
     Mandatory = false,
     Position = 2,
     ValueFromPipelineByPropertyName = true, ParameterSetName = DefaultCredentialsParameterSet)]
-    public string? ClientId { get; set; } = Environment.GetEnvironmentVariable(Authentication.GithubActionsTokenCredential.AZURE_CLIENT_ID);
+    public string? ClientId { get; set; } = Environment.GetEnvironmentVariable(AZURE_CLIENT_ID);
 
     /// <summary>
     /// Specify the Tenant ID for the authentication, is load from the environment variable AZURE_TENANT_ID if not specified.
@@ -67,7 +69,7 @@ public partial class ConnectCaPoliceCommand : DependencyCmdlet<Startup>
     Mandatory = false,
     Position = 1,
     ValueFromPipelineByPropertyName = true, ParameterSetName = DefaultCredentialsParameterSet)]
-    public string? TenantId { get; set; } = Environment.GetEnvironmentVariable(Authentication.GithubActionsTokenCredential.AZURE_TENANT_ID);
+    public string? TenantId { get; set; } = Environment.GetEnvironmentVariable(AZURE_TENANT_ID);
 
     /// <summary>
     /// Try connect to Graph using GitHub Actions workload identity.
@@ -117,7 +119,7 @@ public partial class ConnectCaPoliceCommand : DependencyCmdlet<Startup>
     private ILogger<ConnectCaPoliceCommand> _logger;
 
     [ServiceDependency(Required = true)]
-    private Authentication.CredentialContainer _credentialContainer;
+    private CaPolice.Abstractions.ICredentialContainer _credentialContainer;
 
     /// <inheritdoc />
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
@@ -127,29 +129,13 @@ public partial class ConnectCaPoliceCommand : DependencyCmdlet<Startup>
         switch (ParameterSetName)
         {
             case DefaultCredentialsParameterSet:
-                _credentialContainer.TokenCredential = new Azure.Identity.DefaultAzureCredential(
-                    new Azure.Identity.DefaultAzureCredentialOptions
-                    {
-                        // On a developer machine (not running in Azure), the managed identity and
-                        // workload identity probes hit the IMDS endpoint (169.254.169.254), which is
-                        // unreachable and surfaces a fatal error that stops the credential chain
-                        // before it can fall back to the interactive browser. Both flows have their
-                        // own parameter sets (-UseManagedIdentity / -Github), so exclude them here so
-                        // DefaultAzureCredential can fall back to the interactive browser as intended.
-                        ExcludeManagedIdentityCredential = true,
-                        ExcludeWorkloadIdentityCredential = true,
-                        ExcludeInteractiveBrowserCredential = false,
-                        ExcludeAzureCliCredential = false,
-                        InteractiveBrowserCredentialClientId = ClientId ?? InteractiveBrowserClientId,
-                        ExcludeBrokerCredential = false,
-                        TenantId = TenantId,
-                    });
+                _credentialContainer.UseDefaultCredentials(ClientId ?? InteractiveBrowserClientId, TenantId ?? throw new ArgumentNullException(nameof(TenantId), "TenantId must be specified when using DefaultAzureCredential."));
                 break;
             case GitHubParameterSet:
-                _credentialContainer.TokenCredential = new Authentication.GithubActionsTokenCredential(ClientId, TenantId, httpClient: new System.Net.Http.HttpClient());
+                _credentialContainer.UseGitHubActionsWorkloadIdentity(ClientId!, TenantId!);
                 break;
             case ManagedIdentityParameterSet:
-                _credentialContainer.TokenCredential = new Azure.Identity.ManagedIdentityCredential(new Azure.Identity.ManagedIdentityCredentialOptions());
+                _credentialContainer.UseManagedIdentity(ClientId);
                 break;
             default:
                 return;
@@ -158,9 +144,9 @@ public partial class ConnectCaPoliceCommand : DependencyCmdlet<Startup>
         if (Test)
         {
             var scopes = ParameterSetName == DefaultCredentialsParameterSet ? InteractiveScopes : DefaultScopes;
-            var token = await _credentialContainer.TokenCredential!.GetTokenAsync(new Azure.Core.TokenRequestContext(scopes), cancellationToken);
-            _logger.LogDebug("Token: {Token}", token.Token);
-            WriteObject(token.Token);
+            var token = await _credentialContainer.GetAccessTokenAsync(scopes, cancellationToken);
+            _logger.LogDebug("Token: {Token}", token);
+            WriteObject(token);
         }
     }
 }
